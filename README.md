@@ -1,5 +1,11 @@
-# Intelligent Document AI for Invoice Field Extraction
+# Intelligent Document AI - Invoice Field Extraction
 
-Hackathon project for Convolve 4.0 – IDFC FIRST Bank Track.
+This project extracts key fields from invoice PDF documents and outputs structured JSON.
 
-Goal: Extract structured fields from invoice PDFs into JSON.
+Fields:
+- Dealer Name
+- Model Name
+- Horse Power
+- Asset Cost
+- Dealer Signature (with bounding box)
+- Dealer Stamp (with bounding box)
