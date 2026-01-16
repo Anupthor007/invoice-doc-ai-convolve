@@ -1,2 +1,5 @@
 pdf2image
 Pillow
+paddleocr
+paddlepaddle
+opencv-python
