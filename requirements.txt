@@ -1,5 +1,4 @@
-pdf2image
-Pillow
-paddleocr
-paddlepaddle
+easyocr
 opencv-python
+Pillow
+pdf2image
