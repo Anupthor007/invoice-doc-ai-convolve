@@ -6,8 +6,8 @@ import torch
 import re
 
 # Load pretrained Donut model
-processor = DonutProcessor.from_pretrained("naver-clova-ix/donut-base-finetuned-cord-v2")
-model = VisionEncoderDecoderModel.from_pretrained("naver-clova-ix/donut-base-finetuned-cord-v2")
+processor = DonutProcessor.from_pretrained("naver-clova-ix/donut-base")
+model = VisionEncoderDecoderModel.from_pretrained("naver-clova-ix/donut-base")
 
 # Use GPU if available
 device = "cuda" if torch.cuda.is_available() else "cpu"
