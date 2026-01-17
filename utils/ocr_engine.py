@@ -4,7 +4,7 @@ import easyocr
 import cv2
 
 # Initialize EasyOCR once
-reader = easyocr.Reader(['en','hi','gu'], gpu=True)  # works on Colab GPU
+reader = easyocr.Reader(['en','hi'], gpu=True)  # works on Colab GPU
 
 def run_ocr(image_path):
     """
