@@ -1,8 +1,8 @@
 easyocr
 opencv-python
 Pillow
-pdf2image
+torch
 transformers
 sentencepiece
 timm
-torch
+rapidfuzz
