@@ -1,18 +1,30 @@
-import sys, json
+import sys
+import json
+from PIL import Image
+
 from utils.ocr_engine import run_ocr
-from utils.layoutlm_extractor import extract_layoutlm_embeddings
-from utils.postprocess import extract_fields
+from utils.line_grouping import group_ocr_lines
+from utils.field_extraction import extract_fields_from_lines
 
 def main():
+
     image_path = sys.argv[1]
 
+    # Load image to get height
+    img = Image.open(image_path)
+    image_height = img.size[1]
+
+    # Step 1: OCR
     ocr_data = run_ocr(image_path)
 
-    words, embeddings = extract_layoutlm_embeddings(image_path, ocr_data)
+    # Step 2: Group OCR words into lines
+    text_lines = group_ocr_lines(ocr_data)
 
-    fields = extract_fields(words)
+    # Step 3: Extract required fields
+    fields = extract_fields_from_lines(text_lines, image_height)
 
-    with open("output.json","w",encoding="utf-8") as f:
+    # Step 4: Save output.json
+    with open("output.json", "w", encoding="utf-8") as f:
         json.dump(fields, f, indent=4, ensure_ascii=False)
 
     print("output.json saved")

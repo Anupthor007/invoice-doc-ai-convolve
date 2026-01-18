@@ -1,8 +1,4 @@
 easyocr
 opencv-python
 Pillow
-torch
-transformers
-sentencepiece
-timm
 rapidfuzz
