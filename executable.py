@@ -1,28 +1,21 @@
-import sys
-import json
-
+import sys, json
 from utils.ocr_engine import run_ocr
-from utils.layoutlm_extractor import extract_fields_layoutlm
-from utils.postprocess import clean_fields
+from utils.layoutlm_extractor import extract_layoutlm_embeddings
+from utils.postprocess import extract_fields
 
 def main():
-
     image_path = sys.argv[1]
 
-    # OCR
     ocr_data = run_ocr(image_path)
 
-    # LayoutLMv3 extraction
-    raw_fields = extract_fields_layoutlm(image_path, ocr_data)
+    words, embeddings = extract_layoutlm_embeddings(image_path, ocr_data)
 
-    # Post-process cleanup
-    final_fields = clean_fields(raw_fields)
+    fields = extract_fields(words)
 
-    # Save output.json
-    with open("output.json", "w", encoding="utf-8") as f:
-        json.dump(final_fields, f, indent=4, ensure_ascii=False)
+    with open("output.json","w",encoding="utf-8") as f:
+        json.dump(fields, f, indent=4, ensure_ascii=False)
 
-    print("Saved output.json")
+    print("output.json saved")
 
 if __name__ == "__main__":
     main()

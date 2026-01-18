@@ -1,28 +1,49 @@
 # utils/postprocess.py
 
 import re
+from rapidfuzz import fuzz
 
-def clean_fields(fields):
+# Keywords to anchor fields
+DEALER_KEYWORDS = ["agro", "industries", "corporation", "ltd", "bank"]
+MODEL_KEYWORDS = ["tractor", "kubota", "mahindra", "sonalika"]
+HP_KEYWORDS = ["hp"]
+COST_PATTERN = r"\d{1,3}(?:,\d{2,3})+"
 
-    # Clean Dealer Name
-    dealer = fields["DEALER_NAME"]
+def extract_fields(words):
 
-    # Clean Model Name
-    model = fields["MODEL_NAME"]
+    full_text = " ".join(words).lower()
 
-    # Horse Power numeric
-    hp = fields["HORSE_POWER"]
-    hp_match = re.search(r'\d+', hp)
-    horse_power = hp_match.group() if hp_match else ""
+    dealer_name = ""
+    model_name = ""
+    horse_power = ""
+    asset_cost = ""
 
-    # Asset Cost numeric with commas
-    cost = fields["ASSET_COST"]
-    cost_match = re.findall(r'\d{1,3}(?:,\d{2,3})+', cost.replace(" ", ""))
-    asset_cost = cost_match[-1] if cost_match else ""
+    # Dealer name = longest line containing dealer keywords
+    for w in words:
+        lw = w.lower()
+        if any(k in lw for k in DEALER_KEYWORDS) and len(w) > len(dealer_name):
+            dealer_name = w
+
+    # Model name
+    for w in words:
+        lw = w.lower()
+        if any(k in lw for k in MODEL_KEYWORDS):
+            model_name = w
+            break
+
+    # Horse power
+    hp_match = re.search(r'(\d+)\s*hp', full_text)
+    if hp_match:
+        horse_power = hp_match.group(1)
+
+    # Asset cost
+    cost_match = re.findall(COST_PATTERN, full_text)
+    if cost_match:
+        asset_cost = cost_match[-1]
 
     return {
-        "dealer_name": dealer,
-        "model_name": model,
-        "horse_power": horse_power,
-        "asset_cost": asset_cost
+        "dealer_name": dealer_name.strip(),
+        "model_name": model_name.strip(),
+        "horse_power": horse_power.strip(),
+        "asset_cost": asset_cost.strip()
     }
