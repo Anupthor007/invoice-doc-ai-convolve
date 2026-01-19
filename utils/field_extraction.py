@@ -2,9 +2,17 @@
 
 import re
 
-# Regex patterns
-HP_PATTERN = r'(\d{1,3})\s*hp'
-COST_PATTERN = r'\d{1,3}(?:,\d{2,3})+'
+HP_REGEX = r'(\d{1,3})\s*(?:hp|h\.p)'
+COST_REGEX = r'\d{1,3}(?:,\d{2,3})+'
+
+
+def avg_y(line_data):
+    ys = []
+    for (_, bbox, _) in line_data:
+        for p in bbox:
+            ys.append(p[1])
+    return sum(ys) / len(ys)
+
 
 def extract_fields_from_lines(text_lines, image_height):
 
@@ -13,36 +21,45 @@ def extract_fields_from_lines(text_lines, image_height):
     horse_power = ""
     asset_cost = ""
 
-    # --- Dealer Name ---
-    # Pick longest text line in top 25% of document
-    for line_text, line_data in text_lines:
-        # compute average y of line
-        ys = [p[1] for (_, bbox, _) in line_data for p in bbox]
-        avg_y = sum(ys) / len(ys)
+    # --- DEALER NAME ---
+    # Candidate lines in top 20% of image
+    top_candidates = []
+    for text, line_data in text_lines:
+        if avg_y(line_data) < image_height * 0.20:
+            # Prefer uppercase-heavy and alphabetic lines
+            alpha_ratio = sum(c.isalpha() for c in text) / max(len(text), 1)
+            upper_ratio = sum(c.isupper() for c in text) / max(len(text), 1)
+            score = alpha_ratio + upper_ratio + len(text) / 100
+            top_candidates.append((score, text))
 
-        if avg_y < image_height * 0.25:
-            if len(line_text) > len(dealer_name):
-                dealer_name = line_text
+    if top_candidates:
+        dealer_name = max(top_candidates, key=lambda x: x[0])[1]
 
-    # --- Model Name ---
-    # Look for lines containing keyword 'tractor'
-    for line_text, _ in text_lines:
-        if "tractor" in line_text.lower():
-            model_name = line_text
-            break
+    # --- MODEL NAME ---
+    # Candidate lines in middle region containing digits / parentheses
+    mid_candidates = []
+    for text, line_data in text_lines:
+        y = avg_y(line_data)
+        if image_height * 0.25 < y < image_height * 0.75:
+            digit_ratio = sum(c.isdigit() for c in text) / max(len(text), 1)
+            paren = "(" in text or ")" in text
+            score = digit_ratio + (1 if paren else 0) + len(text) / 100
+            mid_candidates.append((score, text))
 
-    # --- Horse Power ---
-    full_text = " ".join([l[0] for l in text_lines]).lower()
-    hp_match = re.search(HP_PATTERN, full_text)
+    if mid_candidates:
+        model_name = max(mid_candidates, key=lambda x: x[0])[1]
+
+    # --- HORSE POWER ---
+    full_text = " ".join([t[0] for t in text_lines]).lower()
+    hp_match = re.search(HP_REGEX, full_text)
     if hp_match:
         horse_power = hp_match.group(1)
 
-    # --- Asset Cost ---
-    # find all numeric currency patterns
-    cost_matches = re.findall(COST_PATTERN, full_text)
+    # --- ASSET COST ---
+    cost_matches = re.findall(COST_REGEX, full_text)
     if cost_matches:
-        # choose last (usually total)
-        asset_cost = cost_matches[-1]
+        # pick largest numeric magnitude
+        asset_cost = max(cost_matches, key=lambda x: int(x.replace(",", "")))
 
     return {
         "dealer_name": dealer_name.strip(),
