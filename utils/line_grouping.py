@@ -1,9 +1,9 @@
 # utils/line_grouping.py
 
-def group_ocr_lines(ocr_data, y_threshold=15):
+def group_ocr_lines(ocr_data, y_threshold=12):
     """
-    Groups OCR words into lines based on vertical proximity.
-    Returns list of lines, each line = list of (text, bbox)
+    Groups OCR words into lines using vertical proximity.
+    Returns list of tuples: (line_text, line_data)
     """
 
     items = []
@@ -17,25 +17,23 @@ def group_ocr_lines(ocr_data, y_threshold=15):
     items.sort(key=lambda x: x[2])
 
     lines = []
-    current_line = []
+    current = []
 
     for text, bbox, y in items:
-        if not current_line:
-            current_line.append((text, bbox, y))
+        if not current:
+            current.append((text, bbox, y))
             continue
 
-        _, _, last_y = current_line[-1]
-
-        if abs(y - last_y) <= y_threshold:
-            current_line.append((text, bbox, y))
+        if abs(y - current[-1][2]) <= y_threshold:
+            current.append((text, bbox, y))
         else:
-            lines.append(current_line)
-            current_line = [(text, bbox, y)]
+            lines.append(current)
+            current = [(text, bbox, y)]
 
-    if current_line:
-        lines.append(current_line)
+    if current:
+        lines.append(current)
 
-    # Convert to text lines
+    # Build final text lines
     text_lines = []
     for line in lines:
         line_text = " ".join([w[0] for w in line])
