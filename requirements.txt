@@ -1,4 +1,7 @@
-easyocr
+paddleocr
+paddlepaddle
 opencv-python
+transformers
+torch
 Pillow
-rapidfuzz
+tqdm
