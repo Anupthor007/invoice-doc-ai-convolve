@@ -1,7 +1,5 @@
-paddleocr
-paddlepaddle
-opencv-python
-transformers
+easyocr
 torch
+transformers
+opencv-python
 Pillow
-tqdm
