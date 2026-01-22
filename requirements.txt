@@ -1,6 +1,5 @@
 easyocr
-torch
-transformers
 opencv-python
+numpy
 Pillow
-tqdm
+rapidfuzz
