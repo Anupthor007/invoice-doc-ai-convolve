@@ -1,19 +1,15 @@
-import sys
-import json
-from PIL import Image
+import sys, json
 from ocr.easyocr_runner import run_easyocr
-from model.infer_layoutlm import infer
+from extractor.spatial_rules import extract_fields
 
 def main():
     image_path = sys.argv[1]
 
-    image = Image.open(image_path).convert("RGB")
-    words, boxes = run_easyocr(image_path)
+    tokens = run_easyocr(image_path)
+    result = extract_fields(tokens)
 
-    result = infer(image, words, boxes)
-
-    with open("output.json","w") as f:
-        json.dump(result,f,indent=2)
+    with open("output.json","w",encoding="utf8") as f:
+        json.dump(result,f,indent=2,ensure_ascii=False)
 
     print("output.json saved")
 
